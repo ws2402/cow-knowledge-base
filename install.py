@@ -2,23 +2,23 @@ import os
 import json
 import sys
 
-  print("🚀 开始安装知识库插件...")
+print("🚀 开始安装知识库插件...")
 
-  if not os.path.exists('app.py'):
-      print("❌ 错误：请在COW项目根目录下运行此脚本")
-      sys.exit(1)
+if not os.path.exists('app.py'):
+    print("❌ 错误：请在COW项目根目录下运行此脚本")
+sys.exit(1)
 
-  os.makedirs('plugins/knowledge_base', exist_ok=True)
-  os.makedirs('chroma_db', exist_ok=True)
-  print("✅ 创建目录完成")
+os.makedirs('plugins/knowledge_base', exist_ok=True)
+os.makedirs('chroma_db', exist_ok=True)
+print("✅ 创建目录完成")
 
-  print("📦 安装Python依赖...")
-  os.system('pip3 install -q chromadb beautifulsoup4 readability-lxml requests openai')
+print("📦 安装Python依赖...")
+os.system('pip3 install -q chromadb beautifulsoup4 readability-lxml requests openai')
 
-  with open('plugins/knowledge_base/__init__.py', 'w') as f:
-      f.write('')
+with open('plugins/knowledge_base/__init__.py', 'w') as f:
+    f.write('')
 
-  vector_store_code = '''import chromadb,os,hashlib,logging
+vector_store_code = '''import chromadb,os,hashlib,logging
   logger=logging.getLogger(__name__)
   class VectorStore:
    def __init__(self,persist_directory="./chroma_db"):
@@ -46,10 +46,10 @@ import sys
      return formatted_results
     except Exception as e:logger.error(f"搜索失败:{e}");return []'''
 
-  with open('plugins/knowledge_base/vector_store.py', 'w', encoding='utf-8') as f:
-      f.write(vector_store_code)
+with open('plugins/knowledge_base/vector_store.py', 'w', encoding='utf-8') as f:
+ f.write(vector_store_code)
 
-  article_parser_code = '''import requests,re,logging
+article_parser_code = '''import requests,re,logging
   from bs4 import BeautifulSoup
   from readability import Document
   logger=logging.getLogger(__name__)
@@ -87,10 +87,10 @@ import sys
      start=end-overlap if end<len(content) else end
     return chunks'''
 
-  with open('plugins/knowledge_base/article_parser.py', 'w', encoding='utf-8') as f:
-      f.write(article_parser_code)
+with open('plugins/knowledge_base/article_parser.py', 'w', encoding='utf-8') as f:
+ f.write(article_parser_code)
 
-  podcast_parser_code = '''import requests,re,os,tempfile,logging,openai
+podcast_parser_code = '''import requests,re,os,tempfile,logging,openai
   from bs4 import BeautifulSoup
   logger=logging.getLogger(__name__)
   class PodcastParser:
@@ -150,10 +150,10 @@ import sys
      return transcript.text
     except Exception as e:logger.error(f"音频转录失败:{e}");return None'''
 
-  with open('plugins/knowledge_base/podcast_parser.py', 'w', encoding='utf-8') as f:
-      f.write(podcast_parser_code)
+with open('plugins/knowledge_base/podcast_parser.py', 'w', encoding='utf-8') as f:
+ f.write(podcast_parser_code)
 
-  knowledge_base_code = '''import os,re,logging
+knowledge_base_code = '''import os,re,logging
   from bridge.context import ContextType
   from bridge.reply import Reply,ReplyType
   from plugins import *
@@ -222,10 +222,10 @@ import sys
       e_context['context'].content=enhanced_query
     except Exception as e:logger.error(f"检索失败:{e}")'''
 
-  with open('plugins/knowledge_base/knowledge_base.py', 'w', encoding='utf-8') as f:
-      f.write(knowledge_base_code)
+with open('plugins/knowledge_base/knowledge_base.py', 'w', encoding='utf-8') as f:
+ f.write(knowledge_base_code)
 
-  config_data = {
+config_data = {
       "enabled": True,
       "openai_api_key": "请填入你的OpenAI API Key",
       "chroma_persist_directory": "./chroma_db",
@@ -233,13 +233,13 @@ import sys
       "similarity_threshold": 0.7
   }
 
-  with open('plugins/knowledge_base/config.json', 'w', encoding='utf-8') as f:
-      json.dump(config_data, f, indent=2, ensure_ascii=False)
+with open('plugins/knowledge_base/config.json', 'w', encoding='utf-8') as f:
+ json.dump(config_data, f, indent=2, ensure_ascii=False)
 
-  main_config = {}
-  if os.path.exists('plugins/plugins.json'):
-      with open('plugins/plugins.json', 'r', encoding='utf-8') as f:
-          main_config = json.load(f)
+main_config = {}
+if os.path.exists('plugins/plugins.json'):
+ with open('plugins/plugins.json', 'r', encoding='utf-8') as f:
+  main_config = json.load(f)
 
   main_config['knowledge_base'] = {'enabled': True, 'priority': 10}
 
