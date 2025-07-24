@@ -1,6 +1,6 @@
 import os
-  import json
-  import sys
+import json
+import sys
 
   print("🚀 开始安装知识库插件...")
 
