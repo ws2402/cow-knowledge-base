@@ -1,34 +1,25 @@
-#!/usr/bin/env python3
-  # -*- coding: utf-8 -*-
+cat > install.py << 'EOF'
   import os
   import json
   import sys
 
-  def create_knowledge_base_plugin():
-      """创建知识库插件"""
+  print("🚀 开始安装知识库插件...")
 
-      # 检查是否在COW项目目录
-      if not os.path.exists('app.py'):
-          print("❌ 错误：请在COW项目根目录下运行此脚本")
-          sys.exit(1)
+  if not os.path.exists('app.py'):
+      print("❌ 错误：请在COW项目根目录下运行此脚本")
+      sys.exit(1)
 
-      print("🚀 开始安装知识库插件...")
+  os.makedirs('plugins/knowledge_base', exist_ok=True)
+  os.makedirs('chroma_db', exist_ok=True)
+  print("✅ 创建目录完成")
 
-      # 创建目录
-      os.makedirs('plugins/knowledge_base', exist_ok=True)
-      os.makedirs('chroma_db', exist_ok=True)
-      print("✅ 创建目录完成")
+  print("📦 安装Python依赖...")
+  os.system('pip3 install -q chromadb beautifulsoup4 readability-lxml requests openai')
 
-      # 安装依赖
-      print("📦 安装Python依赖...")
-      os.system('pip3 install -q chromadb beautifulsoup4 readability-lxml requests openai')
+  with open('plugins/knowledge_base/__init__.py', 'w') as f:
+      f.write('')
 
-      # 创建 __init__.py
-      with open('plugins/knowledge_base/__init__.py', 'w') as f:
-          f.write('')
-
-      # 创建 vector_store.py
-      vector_store_code = '''import chromadb
+  vector_store_code = """import chromadb
   import os
   import hashlib
   import logging
@@ -72,13 +63,12 @@
           except Exception as e:
               logger.error(f"搜索失败: {e}")
               return []
-  '''
+  """
 
-      with open('plugins/knowledge_base/vector_store.py', 'w', encoding='utf-8') as f:
-          f.write(vector_store_code)
+  with open('plugins/knowledge_base/vector_store.py', 'w', encoding='utf-8') as f:
+      f.write(vector_store_code)
 
-      # 创建 article_parser.py
-      article_parser_code = '''import requests
+  article_parser_code = """import requests
   import re
   import logging
   from bs4 import BeautifulSoup
@@ -141,13 +131,12 @@
                   chunks.append(chunk)
               start = end - overlap if end < len(content) else end
           return chunks
-  '''
+  """
 
-      with open('plugins/knowledge_base/article_parser.py', 'w', encoding='utf-8') as f:
-          f.write(article_parser_code)
+  with open('plugins/knowledge_base/article_parser.py', 'w', encoding='utf-8') as f:
+      f.write(article_parser_code)
 
-      # 创建 podcast_parser.py
-      podcast_parser_code = '''import requests
+  podcast_parser_code = """import requests
   import re
   import os
   import tempfile
@@ -244,13 +233,12 @@
           except Exception as e:
               logger.error(f"音频转录失败: {e}")
               return None
-  '''
+  """
 
-      with open('plugins/knowledge_base/podcast_parser.py', 'w', encoding='utf-8') as f:
-          f.write(podcast_parser_code)
+  with open('plugins/knowledge_base/podcast_parser.py', 'w', encoding='utf-8') as f:
+      f.write(podcast_parser_code)
 
-      # 创建 knowledge_base.py
-      knowledge_base_code = '''import os
+  knowledge_base_code = """import os
   import re
   import logging
   from typing import Optional, List
@@ -360,40 +348,36 @@
                   e_context['context'].content = enhanced_query
           except Exception as e:
               logger.error(f"检索失败: {e}")
-  '''
+  """
 
-      with open('plugins/knowledge_base/knowledge_base.py', 'w', encoding='utf-8') as f:
-          f.write(knowledge_base_code)
+  with open('plugins/knowledge_base/knowledge_base.py', 'w', encoding='utf-8') as f:
+      f.write(knowledge_base_code)
 
-      # 创建配置文件
-      config_data = {
-          "enabled": True,
-          "openai_api_key": "请填入你的OpenAI API Key",
-          "chroma_persist_directory": "./chroma_db",
-          "max_results": 5,
-          "similarity_threshold": 0.7
-      }
+  config_data = {
+      "enabled": True,
+      "openai_api_key": "请填入你的OpenAI API Key",
+      "chroma_persist_directory": "./chroma_db",
+      "max_results": 5,
+      "similarity_threshold": 0.7
+  }
 
-      with open('plugins/knowledge_base/config.json', 'w', encoding='utf-8') as f:
-          json.dump(config_data, f, indent=2, ensure_ascii=False)
+  with open('plugins/knowledge_base/config.json', 'w', encoding='utf-8') as f:
+      json.dump(config_data, f, indent=2, ensure_ascii=False)
 
-      # 更新主配置
-      main_config = {}
-      if os.path.exists('plugins/plugins.json'):
-          with open('plugins/plugins.json', 'r', encoding='utf-8') as f:
-              main_config = json.load(f)
+  main_config = {}
+  if os.path.exists('plugins/plugins.json'):
+      with open('plugins/plugins.json', 'r', encoding='utf-8') as f:
+          main_config = json.load(f)
 
-      main_config['knowledge_base'] = {'enabled': True, 'priority': 10}
+  main_config['knowledge_base'] = {'enabled': True, 'priority': 10}
 
-      with open('plugins/plugins.json', 'w', encoding='utf-8') as f:
-          json.dump(main_config, f, indent=2, ensure_ascii=False)
+  with open('plugins/plugins.json', 'w', encoding='utf-8') as f:
+      json.dump(main_config, f, indent=2, ensure_ascii=False)
 
-      print("🎉 知识库插件安装完成！")
-      print("")
-      print("接下来请：")
-      print("1. 配置API Key: nano plugins/knowledge_base/config.json")
-      print("2. 重启项目: pkill -f app.py && nohup python3 app.py &")
-      print("3. 测试功能: 发送微信文章或播客链接")
-
-  if __name__ == "__main__":
-      create_knowledge_base_plugin()
+  print("🎉 知识库插件安装完成！")
+  print("")
+  print("接下来请：")
+  print("1. 配置API Key: nano plugins/knowledge_base/config.json")
+  print("2. 重启项目: pkill -f app.py && nohup python3 app.py &")
+  print("3. 测试功能: 发送微信文章或播客链接")
+  EOF
